@@ -16,18 +16,24 @@ import (
 )
 
 func main() {
+	var ip string
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	for {
-		ip, err := getCurrentIp()
+		currentIP, err := getCurrentIp()
 		if err != nil {
 			log.Printf("Failed to get current IP: %s", err)
 		}
 
-		err = updateDnsRecord(ip)
+		if currentIP == ip {
+			continue
+		}
+
+		err = updateDnsRecord(currentIP)
 		if err != nil {
 			log.Printf("Failed to update DNS record: %s", err)
 		}
