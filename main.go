@@ -27,6 +27,7 @@ func main() {
 		currentIP, err := getCurrentIp()
 		if err != nil {
 			log.Printf("Failed to get current IP: %s", err)
+			continue
 		}
 
 		if currentIP == ip {
@@ -35,11 +36,10 @@ func main() {
 
 		if err := updateDnsRecord(currentIP); err != nil {
 			log.Printf("Failed to update DNS record: %s", err)
+		} else {
+			fmt.Printf("DNS record was updated to: %s", currentIP)
+			ip = currentIP
 		}
-
-		fmt.Println("DNS record was updated to: ", currentIP)
-
-		ip = currentIP
 
 		time.Sleep(time.Second)
 	}
