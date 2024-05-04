@@ -33,10 +33,13 @@ func main() {
 			continue
 		}
 
-		err = updateDnsRecord(currentIP)
-		if err != nil {
+		if err := updateDnsRecord(currentIP); err != nil {
 			log.Printf("Failed to update DNS record: %s", err)
 		}
+
+		fmt.Println("DNS record was updated to: ", currentIP)
+
+		ip = currentIP
 
 		time.Sleep(time.Second)
 	}
@@ -81,6 +84,7 @@ func updateDnsRecord(ip string) error {
 
 	if res.Body != nil {
 		defer res.Body.Close()
+
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return err
