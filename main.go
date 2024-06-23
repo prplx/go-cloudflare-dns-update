@@ -26,7 +26,7 @@ func main() {
 	for {
 		currentIP, err := getCurrentIp()
 		if err != nil {
-			log.Printf("Failed to get current IP: %s", err)
+			log.Printf("Failed to get current IP: %s\n", err)
 			continue
 		}
 
@@ -35,9 +35,9 @@ func main() {
 		}
 
 		if err := updateDnsRecord(currentIP); err != nil {
-			log.Printf("Failed to update DNS record: %s", err)
+			log.Printf("Failed to update DNS record: %s\n", err)
 		} else {
-			fmt.Printf("DNS record was updated to: %s", currentIP)
+			fmt.Printf("DNS record has been updated to: %s\n", currentIP)
 			ip = currentIP
 		}
 
@@ -55,8 +55,7 @@ func getCurrentIp() (string, error) {
 
 func updateDnsRecord(ip string) error {
 	apiURL := os.Getenv("CF_API_URL")
-	email := os.Getenv("CF_API_EMAIL")
-	apiKey := os.Getenv("CF_API_KEY")
+	apiToken := os.Getenv("CF_API_TOKEN")
 	zoneId := os.Getenv("CF_ZONE_ID")
 	recordId := os.Getenv("CF_DNS_RECORD_ID")
 
@@ -69,8 +68,7 @@ func updateDnsRecord(ip string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("X-Auth-Email", email)
-	req.Header.Set("X-Auth-Key", apiKey)
+	req.Header.Set("Authorization", "Bearer "+apiToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := http.DefaultClient.Do(req)
