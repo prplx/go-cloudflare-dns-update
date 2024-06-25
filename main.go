@@ -24,10 +24,18 @@ func main() {
 	}
 
 	for {
-		currentIP, err := getCurrentIp()
+		time.Sleep(time.Second * 1)
+
+		currentIP, err := getCurrentIpWithIpify()
 		if err != nil {
-			log.Printf("Failed to get current IP: %s\n", err)
-			continue
+			log.Printf("Failed to get current IP with ipify: %s\n", err)
+
+			currentIP, err = getCurrentIpWithFreeIPAPI()
+			if err != nil {
+				log.Printf("Failed to get current IP with freecurrentip: %s\n", err)
+
+				continue
+			}
 		}
 
 		if currentIP == ip {
@@ -41,16 +49,42 @@ func main() {
 			ip = currentIP
 		}
 
-		time.Sleep(time.Second)
 	}
 }
 
-func getCurrentIp() (string, error) {
+func getCurrentIpWithIpify() (string, error) {
 	ip, err := ipify.GetIp()
 	if err != nil {
 		return "", err
 	}
 	return ip, nil
+}
+
+func getCurrentIpWithFreeIPAPI() (string, error) {
+	type Response struct {
+		IP string `json:"ipAddress"`
+	}
+	resp, err := http.Get("https://freeipapi.com/api/json")
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var response Response
+
+	err = json.Unmarshal(body, &response)
+	fmt.Println(string(body))
+	if err != nil {
+		return "", err
+	}
+
+	return response.IP, nil
 }
 
 func updateDnsRecord(ip string) error {
