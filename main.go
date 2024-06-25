@@ -79,7 +79,6 @@ func getCurrentIpWithFreeIPAPI() (string, error) {
 	var response Response
 
 	err = json.Unmarshal(body, &response)
-	fmt.Println(string(body))
 	if err != nil {
 		return "", err
 	}
