@@ -26,11 +26,11 @@ func main() {
 	for {
 		time.Sleep(time.Second * 1)
 
-		currentIP, err := getCurrentIpWithIpify()
+		currentIP, err := getCurrentIpWithFreeIPAPI()
 		if err != nil {
 			log.Printf("Failed to get current IP with ipify: %s\n", err)
 
-			currentIP, err = getCurrentIpWithFreeIPAPI()
+			currentIP, err = getCurrentIpWithIpify()
 			if err != nil {
 				log.Printf("Failed to get current IP with freecurrentip: %s\n", err)
 
