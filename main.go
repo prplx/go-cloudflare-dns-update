@@ -28,7 +28,7 @@ func main() {
 
 		currentIP, err := getCurrentIpWithIpify()
 		if err != nil {
-			log.Printf("Failed to get current IP with ipify: %s\n", err)
+			log.Printf("Failed to get current IP with ipify, trying to get from freecurrentip: %s\n", err)
 
 			currentIP, err = getCurrentIpWithFreeIPAPI()
 			if err != nil {
