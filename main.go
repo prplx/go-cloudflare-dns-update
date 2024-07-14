@@ -7,12 +7,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"encoding/json"
 
 	"github.com/joho/godotenv"
 	"github.com/rdegges/go-ipify"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -22,6 +24,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	recordIds := strings.Split(os.Getenv("CF_DNS_RECORD_ID"), ",")
 
 	for {
 		time.Sleep(time.Second * 1)
@@ -42,7 +46,16 @@ func main() {
 			continue
 		}
 
-		if err := updateDnsRecord(currentIP); err != nil {
+		eg := errgroup.Group{}
+		for _, recordId := range recordIds {
+			func(recId string) {
+				eg.Go(func() error {
+					return updateDnsRecord(recId, currentIP)
+				})
+			}(recordId)
+		}
+
+		if err := eg.Wait(); err != nil {
 			log.Printf("Failed to update DNS record: %s\n", err)
 		} else {
 			fmt.Printf("DNS record has been updated to: %s\n", currentIP)
@@ -86,11 +99,10 @@ func getCurrentIpWithFreeIPAPI() (string, error) {
 	return response.IP, nil
 }
 
-func updateDnsRecord(ip string) error {
+func updateDnsRecord(recordId, ip string) error {
 	apiURL := os.Getenv("CF_API_URL")
 	apiToken := os.Getenv("CF_API_TOKEN")
 	zoneId := os.Getenv("CF_ZONE_ID")
-	recordId := os.Getenv("CF_DNS_RECORD_ID")
 
 	resp := struct {
 		Success bool `json:"success"`
